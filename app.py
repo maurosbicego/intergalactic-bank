@@ -6,9 +6,11 @@ import bcrypt
 from bson import ObjectId
 import jwt
 import time
+from flask_cors import CORS
 
-config = dotenv_values(".env")
+config = dotenv_values("python.env")
 app = Flask(__name__)
+CORS(app)
 flag = config["flag"]
 db = MongoClient(config["database_url"]).igb
 users = db.users
@@ -35,8 +37,9 @@ def register():
     else:
         result = users.insert_one({"email":data["email"],"name":data["name"],"id_validated":False,"password":bcrypt.hashpw(data["password"].encode("UTF-8"), bcrypt.gensalt())})
         if ObjectId.is_valid(result.inserted_id):
-            resp = make_response("Ok")
-            resp.set_cookie('auth', jwt.encode({"id": str(result.inserted_id)}, "secret", algorithm="HS256"))
+            auth = jwt.encode({"id": str(result.inserted_id)}, jwt_secret, algorithm="HS256")
+            resp = make_response({"status": "Ok", "auth": auth, "userid":str(result.inserted_id)})
+            resp.set_cookie('auth', auth)
             return resp
     return "",500
 
@@ -44,14 +47,16 @@ def register():
 def login():
     data = request.json # mail, password
     user = users.find_one({"email":data['email']})
-    print(user)
-    if user['password'] is not None:
+
+    if user is not None:
         check = bcrypt.checkpw(data["password"].encode("UTF-8"), user["password"])
         if check:
-            resp = make_response("Ok")
-            resp.set_cookie('auth', jwt.encode({"id": str(user["_id"])}, jwt_secret, algorithm="HS256"))
+            auth = jwt.encode({"id": str(user["_id"])}, jwt_secret, algorithm="HS256")
+            resp = make_response({"status": "Ok", "auth": auth, "userid":str(user["_id"])})
+            resp.set_cookie('auth', auth)
             return resp
-    return ""
+
+    return "Login failed", 400
 
 @app.route("/user/getbyid", methods=["POST"])
 def get_me():
