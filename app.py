@@ -16,7 +16,7 @@ db = MongoClient(config["database_url"]).igb
 users = db.users
 accounts = db.accounts
 jwt_secret = config["jwt_secret"]
-target_amount = 1000
+target_amount = 1000000
 
 def fixuserobj(user):
     user["_id"] = str(user["_id"])
@@ -77,7 +77,6 @@ def get_me():
 @app.route("/account/new", methods=["GET"])
 def new_account():
     jwt_auth = request.headers["auth"]
-    print("OKKK")
     decoded = jwt.decode(jwt_auth, jwt_secret, algorithms=["HS256"])
     user = fixuserobj(users.find_one({"_id":ObjectId(decoded['id'])}))
 
@@ -132,7 +131,7 @@ def transfer_funds(fromacc, toacc): # BUG IS IN THIS ENDPOINT. Some parts have b
         if from_ok and to_ok and amount_ok:
 
             accounts.update_one({"_id":ObjectId(toacc)}, {"$set": {"balance":toaccobj["balance"]+amount}}, upsert=True)
-            time.sleep(0.05)
+            time.sleep(0.03)
             accounts.update_one({"_id":ObjectId(fromacc)}, {"$set": {"balance":fromaccobj["balance"]-amount}}, upsert=True)
 
         else:

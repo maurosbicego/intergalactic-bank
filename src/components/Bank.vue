@@ -40,7 +40,7 @@
                 </td>
 
                 <td class="px-6 py-4 whitespace-no-wrap text-right text-sm leading-5 font-medium">
-                  <button v-if="a.balance >= 100" v-on:click="buy_spaceship(a._id)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Buy Spaceship</button>
+                  <button v-if="a.balance >= 1000000" v-on:click="buy_spaceship(a._id)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Buy Spaceship</button>
                   <button v-else class="bg-gray-500 text-white font-bold py-2 px-4 rounded" disabled>Disabled</button>
                 </td>
               </tr>
