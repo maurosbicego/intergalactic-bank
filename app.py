@@ -107,8 +107,12 @@ def list_accounts():
 def transfer_funds(fromacc, toacc): # BUG IS IN THIS ENDPOINT. Some parts have been programmed in a "weird" way so that the exploiting is easier
     jwt_auth = request.headers["auth"]
     data = request.json # amount
+    if fromacc == toacc:
+        return "You can only transfer to a different account",400
     try:
         amount = int(data["amount"])
+        if amount < 0:
+            return "Amount must be positive", 400
     except:
         return "Amount not int", 400
     decoded = jwt.decode(jwt_auth, jwt_secret, algorithms=["HS256"])
